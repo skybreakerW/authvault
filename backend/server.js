@@ -1,13 +1,13 @@
 import "./load-env.js"
 import app from "./src/app.js"
-
-
+import connectDB from "./src/config/db.js"
 
 const port = process.env.PORT || 8080
 
 
 const startServer = async() => {
     try {
+        await connectDB()
         app.listen(port, () => {
             console.log(`Server listening on ${port}`)
         })
