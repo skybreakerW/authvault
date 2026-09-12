@@ -1,6 +1,6 @@
 import "./load-env.js"
 import app from "./src/app.js"
-import connectDB from "./src/config/db.js"
+import connectDB from "./src/configs/db.js"
 
 const port = process.env.PORT || 8080
 
