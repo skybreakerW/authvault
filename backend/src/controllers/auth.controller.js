@@ -1,6 +1,8 @@
 import User from  "../models/user.model.js"
 import bcrypt from "bcrypt"
 import { isValidEmail, isValidPassword, isValidName, } from "../utils/validators.js"
+import EmailVerification from "../models/emailVerification.model.js "
+import { createEmailVerification } from "../services/otp.service.js"
 
 const signup = async(req, res) => {
 
@@ -47,6 +49,13 @@ const signup = async(req, res) => {
                 password: hashPassword,
             })
 
+            const { otp, expiresAt} = createEmailVerification()
+
+            const verifyEmail = await EmailVerification.create({
+                user: user._id,
+                otp,
+                expiresAt,
+            })
             
 
             return res.status(201).json({
