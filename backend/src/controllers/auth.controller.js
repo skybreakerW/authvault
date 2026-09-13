@@ -1,5 +1,6 @@
 import User from  "../models/user.model.js"
 import bcrypt from "bcrypt"
+import { isValidEmail, isValidPassword, isValidName, } from "../utils/validators.js"
 
 const signup = async(req, res) => {
 
@@ -11,6 +12,24 @@ const signup = async(req, res) => {
                     message: "All fields are required."
                 })
             }
+
+            if (!isValidName(name)) {
+                return res.status(400).json({
+                    message: "Name must be between 3 and 50 characters."
+                })
+            }
+
+            if (!isValidEmail(email)) {
+                return res.status(400).json({
+                    message: "Please provide a valid email address."
+                })
+            }
+
+            if (!isValidPassword(password)) {
+                return res.status(400).json({
+                    message: "Password must be at least 8 characters."
+                })
+            }
         
             const userExists = await User.findOne({email})
             if(userExists){
@@ -20,12 +39,15 @@ const signup = async(req, res) => {
             }
         
             const hashPassword = await bcrypt.hash(password, 10)
+            const normalizedEmail = email.trim().toLowerCase()
         
             const user = await User.create({
                 name,
-                email,
+                email: normalizedEmail,
                 password: hashPassword,
             })
+
+            
 
             return res.status(201).json({
                 message: "User registered successfully.",
