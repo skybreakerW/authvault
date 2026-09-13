@@ -4,6 +4,9 @@ import { isValidEmail, isValidPassword, isValidName, } from "../utils/validators
 import EmailVerification from "../models/emailVerification.model.js "
 import { createEmailVerification } from "../services/otp.service.js"
 import { sendVerificationEmail } from "../services/email.service.js"
+import Session from "../models/session.model.js"
+import { generateAccessToken, generateRefreshToken } from "../utils/token.js"
+
 
 const signup = async(req, res) => {
 
@@ -61,9 +64,7 @@ const signup = async(req, res) => {
             try {
                 await sendVerificationEmail(user.email, otp)
             } catch (error) {
-                console.error("Verification email failed:", emailError)
-            }
-
+                console.error("Verification email failed:", error)
                 await EmailVerification.deleteOne({
                     user: user._id,
                 })
@@ -71,6 +72,7 @@ const signup = async(req, res) => {
                 await User.deleteOne({
                     _id: user._id,
                 })
+            }
 
             return res.status(201).json({
                 message: "User registered successfully.",
@@ -98,14 +100,22 @@ const verifyEmail = async(req,res) => {
             const { email, otp } = req.body
         
             if (!email || !otp) {
-            return res.status(400).json({
-                message: "Email and OTP are required."
+                return res.status(400).json({
+                    message: "Email and OTP are required."
             })
             }
             const normalizedEmail = email.trim().toLowerCase()
+
             const user = await User.findOne({
                 email: normalizedEmail
             })
+
+            if (user.isEmailVerified) {
+                return res.status(400).json({
+                    message: "Email is already verified."
+                })
+            }
+
             if(!user){
                return res.status(404).json({
                 message: "User not found."
@@ -133,18 +143,12 @@ const verifyEmail = async(req,res) => {
                 })
             }
 
-            if(otp != verification.otp){
+            if(otp !== verification.otp){
                 verification.attempts += 1
                 await verification.save()
 
                 return res.status(400).json({
                     message: "Invalid OTP."
-                })
-            }
-
-            if (user.isEmailVerified) {
-                return res.status(400).json({
-                    message: "Email is already verified."
                 })
             }
 
@@ -192,16 +196,39 @@ const login = async(req, res) => {
             })
         }
 
-        const isPasswordValid = bcrypt.compare(password, user.password)
+        const isPasswordValid = await bcrypt.compare(password, user.password)
         if(!isPasswordValid){
             return res.status(401).json({
                 message: "Invalid email or password."
             })
         }
 
+        const session = await Session.create({
+            user: user._id,
+            refreshTokenHash: "temporary",
+            expiresAt: new Date(
+                Date.now() + 7 * 24 * 60 * 60 * 1000
+            )
+        })
+
+        const accessToken = generateAccessToken(user)
+        const refreshToken = generateRefreshToken(
+            user,
+            session._id,
+        )
+
+        const refreshTokenHash = await bcrypt.hash(refreshToken, 10)
+
+        session.refreshTokenHash = refreshTokenHash
+        await session.save()
+
 
         return res.status(200).json({
-            message: "Logged in successfully."
+            message: "Logged in successfully.",
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
         })
 
     } catch (error) {

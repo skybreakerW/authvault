@@ -16,8 +16,8 @@ const generateAccessToken = (user) => {
     )
 }
 
-const generateRefreshToken = (user) => {
-    return jwjt.sign(
+const generateRefreshToken = (user, sessionId) => {
+    return jwt.sign(
         {
             userId: user._id,
             sessionId,
