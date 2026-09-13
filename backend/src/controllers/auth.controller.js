@@ -58,7 +58,19 @@ const signup = async(req, res) => {
                 expiresAt,
             })
 
-            await sendVerificationEmail(user.email, otp)
+            try {
+                await sendVerificationEmail(user.email, otp)
+            } catch (error) {
+                console.error("Verification email failed:", emailError)
+            }
+
+                await EmailVerification.deleteOne({
+                    user: user._id,
+                })
+
+                await User.deleteOne({
+                    _id: user._id,
+                })
 
             return res.status(201).json({
                 message: "User registered successfully.",
@@ -81,9 +93,84 @@ const signup = async(req, res) => {
    
 }
 
+const verifyEmail = async(req,res) => {
+    try {
+            const { email, otp } = req.body
+        
+            if (!email || !otp) {
+            return res.status(400).json({
+                message: "Email and OTP are required."
+            })
+            }
+            const normalizedEmail = email.trim().toLowerCase()
+            const user = await User.findOne({
+                email: normalizedEmail
+            })
+            if(!user){
+               return res.status(404).json({
+                message: "User not found."
+            }) 
+            }
+
+            const verification = await EmailVerification.findOne({
+                user: user._id
+            })
+            if(!verification){
+                return res.status(404).json({
+                message: "Verification record not found."
+            })
+            }
+
+            if(verification.expiresAt < new Date()){
+                return res.status(400).json({
+                    message: "OTP has expired."
+                })
+            }
+
+            if(verification.attempts >= 5){
+                return res.status(400).json({
+                    message: "Too many incorrect attempts. Try again later."
+                })
+            }
+
+            if(otp != verification.otp){
+                verification.attempts += 1
+                await verification.save()
+
+                return res.status(400).json({
+                    message: "Invalid OTP."
+                })
+            }
+
+            if (user.isEmailVerified) {
+                return res.status(400).json({
+                    message: "Email is already verified."
+                })
+            }
+
+            user.isEmailVerified = true
+            await user.save()
+
+            await EmailVerification.deleteOne({
+                _id: verification._id,
+            })
+
+            return res.status(200).json({
+                message: "Email verified successfully."
+            })
+
+    } catch (error) {
+        console.error("Email verification error:", error)
+        return res.status(500).json({
+            message: "Something went wrong."
+        })
+    }
+
+}
 
 
 
 
 
-export { signup }
+
+export { signup, verifyEmail }
