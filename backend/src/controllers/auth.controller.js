@@ -502,6 +502,96 @@ const forgotPassword = async(req, res) => {
     }
 }
 
+const verifyResetOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body
+
+        if (!email || !otp) {
+            return res.status(400).json({
+                message: "Email and OTP are required."
+            })
+        }
+
+        const normalizedEmail = email.trim().toLowerCase()
+
+        const user = await User.findOne({
+            email: normalizedEmail
+        })
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid reset request."
+            })
+        }
+
+        const resetRequest = await PasswordReset.findOne({
+            user: user._id
+        })
+
+        if (!resetRequest) {
+            return res.status(400).json({
+                message: "Invalid or expired OTP."
+            })
+        }
+
+        if (resetRequest.expiresAt < new Date()) {
+            await PasswordReset.deleteOne({
+                _id: resetRequest._id
+            })
+
+            return res.status(400).json({
+                message: "OTP has expired."
+            })
+        }
+
+        if (resetRequest.attempts >= 5) {
+            await PasswordReset.deleteOne({
+                _id: resetRequest._id
+            })
+
+            return res.status(429).json({
+                message: "Too many OTP attempts."
+            })
+        }
+
+        resetRequest.attempts += 1
+        await resetRequest.save()
+
+        if (otp !== resetRequest.otp) {
+            return res.status(400).json({
+                message: "Invalid OTP."
+            })
+        }
+
+        const resetToken = jwt.sign(
+            {
+                userId: user._id,
+                purpose: "password-reset",
+            },
+            process.env.JWT_RESET_SECRET,
+            {
+                expiresIn: "10m",
+            }
+        )
+
+        await PasswordReset.deleteOne({
+            _id: resetRequest._id
+        })
+
+        return res.status(200).json({
+            message: "OTP verified successfully.",
+            resetToken
+        })
+
+    } catch (error) {
+        console.log("Verify reset OTP error:", error)
+
+        return res.status(500).json({
+            message: "Something went wrong."
+        })
+    }
+}
 
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword }
+
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP }
