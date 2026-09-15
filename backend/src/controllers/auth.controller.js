@@ -592,6 +592,74 @@ const verifyResetOTP = async (req, res) => {
     }
 }
 
+const resetPassword = async(req, res) => {
+    try {
+        const { resetToken, newPassword } = req.body
+
+        if (!resetToken || !newPassword) {
+            return res.status(400).json({
+                message: "Reset token and new password are required."
+            })
+        }
+
+        if (!isValidPassword(newPassword)) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters."
+            })
+        }
+
+        const decoded = jwt.verify(
+            resetToken,
+            process.env.JWT_RESET_SECRET
+        )
+
+        if (decoded.purpose !== "password-reset") {
+            return res.status(401).json({
+                message: "Invalid reset token."
+            })
+        }
+
+        const user = await User.findById(decoded.userId)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found."
+            })
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            newPassword,
+            10
+        )
+
+        user.password = hashedPassword
+
+        await user.save()
+
+        await Session.updateMany(
+            {
+                user: user._id,
+                revokedAt: null
+            },
+            {
+                $set: {
+                    revokedAt: new Date()
+                }
+            }
+        )
+
+        return res.status(200).json({
+            message: "Password reset successfully."
+        })
+
+    } catch (error) {
+        console.log("Reset password error:", error)
+
+        return res.status(401).json({
+            message: "Invalid or expired reset token."
+        })
+    }
+}
 
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP }
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword }
