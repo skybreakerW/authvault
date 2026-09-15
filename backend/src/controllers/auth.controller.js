@@ -7,7 +7,7 @@ import { sendVerificationEmail } from "../services/email.service.js"
 import Session from "../models/session.model.js"
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js"
 import jwt from "jsonwebtoken"
-
+import PasswordReset from "../models/passwordReset.model.js"
 
 const signup = async(req, res) => {
 
@@ -431,7 +431,77 @@ const logoutAll = async(req, res) => {
     }   
 }
 
+const forgotPassword = async(req, res) => {
+    try {
+        const { email } = req.body
+        if(!email){
+            return res.status(400).json({
+                message: "Email is required."
+            })
+        }
+
+        const normalizedEmail = email.trim().toLowerCase()
+
+        const user = await User.findOne({
+            email: normalizedEmail
+        })
+        if(!user){
+            return res.status(404).json({
+                message: "If an account exists, a reset code has been sent."
+            })
+        }
+
+        if(!user.isEmailVerified){
+            return res.status(403).json({
+                message: "Please verify your email first."
+            })
+        }
+
+        const { otp, expiresAt } = createEmailVerification()
+
+        await PasswordReset.deleteMany({
+            user: user._id
+        })
+
+        await PasswordReset.create({
+            user: user._id,
+            otp,
+            expiresAt,
+        })
+
+        try {
+            await sendVerificationEmail(
+                user.email,
+                otp
+            )
+        } catch (error) {
+            console.error(
+                "Password reset email failed:",
+                error
+            )
+
+            await PasswordReset.deleteMany({
+                user: user._id
+            })
+
+            return res.status(500).json({
+                message: "Unable to send password reset email."
+            })
+        }
+
+        return res.status(200).json({
+            message: "Password reset OTP sent successfully."
+        })
+        
+    } catch (error) {
+    console.log("Forgot password error:", error)
+
+    return res.status(500).json({
+        message: "Something went wrong."
+    })
+    }
+}
 
 
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll }
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword }
