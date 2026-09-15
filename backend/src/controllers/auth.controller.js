@@ -384,6 +384,54 @@ const logout = async(req, res) => {
     }
 }
 
+const logoutAll = async(req, res) => {
+    try {
+        const token = req.cookies.refreshToken
+
+        if(!token){
+            return res.status(401).json({
+                message: "Refresh token is required."
+            })
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+        await Session.updateMany({
+            user: decoded.userId,
+            revokedAt: null
+        },
+        {
+            $set: {
+                revokedAt: new Date()
+            }
+        }
+        )
+
+        res.clearCookie("accesToken", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+        })
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+        })
+
+        return res.status(200).json({
+            message: "Logged out from all devices successfully."
+        })
+
+    } catch (error) {
+        console.log("Logout all error:", error)
+
+        return res.status(401).json({
+            message: "Invalid or expired refresh token."
+        })
+    }   
+}
 
 
-export { signup, verifyEmail, login, refreshToken, logout }
+
+
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll }
