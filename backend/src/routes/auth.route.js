@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword } from "../controllers/auth.controller.js";
+import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices } from "../controllers/auth.controller.js";
 import authenticateUser from "../middlewares/auth.middleware.js"
 import requireAdmin from "../middlewares/admin.middleware.js"
 import { getMySessions, revokeSession } from "../controllers/session.controller.js"
@@ -15,7 +15,7 @@ router.post("/logout-all", logoutAll)
 router.post("/forgot-password", forgotPassword)
 router.post("/verify-reset-otp", verifyResetOTP)
 router.post("/reset-password", resetPassword)
-
+router.post("/logout-other-devices", logoutOtherDevices)
 router.get(
     "/me",
     authenticateUser,

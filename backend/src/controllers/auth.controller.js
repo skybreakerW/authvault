@@ -661,5 +661,46 @@ const resetPassword = async(req, res) => {
     }
 }
 
+const logoutOtherDevices = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword }
+        if (!token) {
+            return res.status(401).json({
+                message: "Refresh token is required."
+            })
+        }
+
+        const decoded = jwt.verify(
+            token,
+            process.env.JWT_REFRESH_SECRET
+        )
+
+        await Session.updateMany(
+            {
+                user: decoded.userId,
+                _id: { $ne: decoded.sessionId },
+                revokedAt: null
+            },
+            {
+                $set: {
+                    revokedAt: new Date()
+                }
+            }
+        )
+
+        return res.status(200).json({
+            message: "Logged out from all other devices successfully."
+        })
+
+    } catch (error) {
+        console.log("Logout other devices error:", error)
+
+        return res.status(401).json({
+            message: "Invalid or expired refresh token."
+        })
+    }
+}
+
+
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices }
