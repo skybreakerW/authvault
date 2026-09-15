@@ -29,15 +29,4 @@ router.get(
         })
     })
 
-router.get(
-    "/admin-test",
-    authenticateUser,
-    requireAdmin,
-    (req, res) => {
-        return res.status(200).json({
-            message: "Admin access granted."
-        })
-    }
-)
-
 export default router
