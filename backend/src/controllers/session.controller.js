@@ -23,6 +23,46 @@ const getMySessions = async (req, res) => {
     }
 }
 
+const revokeSession = async (req, res) => {
+    try {
+        const { sessionId } = req.params
+
+        if (!sessionId) {
+            return res.status(400).json({
+                message: "Session ID is required."
+            })
+        }
+
+        const session = await Session.findOne({
+            _id: sessionId,
+            user: req.user._id,
+            revokedAt: null
+        })
+
+        if (!session) {
+            return res.status(404).json({
+                message: "Session not found."
+            })
+        }
+
+        session.revokedAt = new Date()
+
+        await session.save()
+
+        return res.status(200).json({
+            message: "Session revoked successfully."
+        })
+
+    } catch (error) {
+        console.log("Revoke session error:", error)
+
+        return res.status(500).json({
+            message: "Something went wrong."
+        })
+    }
+}
+
 export {
-    getMySessions
+    getMySessions,
+    revokeSession
 }

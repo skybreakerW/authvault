@@ -2,7 +2,7 @@ import express from "express";
 import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword } from "../controllers/auth.controller.js";
 import authenticateUser from "../middlewares/auth.middleware.js"
 import requireAdmin from "../middlewares/admin.middleware.js"
-import { getMySessions } from "../controllers/session.controller.js"
+import { getMySessions, revokeSession } from "../controllers/session.controller.js"
 
 const router = express.Router()
 
@@ -35,5 +35,12 @@ router.get(
     authenticateUser,
     getMySessions
 )
+
+router.delete(
+    "/sessions/:sessionId",
+    authenticateUser,
+    revokeSession
+)
+
 
 export default router
