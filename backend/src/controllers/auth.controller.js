@@ -6,6 +6,7 @@ import { createEmailVerification } from "../services/otp.service.js"
 import { sendVerificationEmail } from "../services/email.service.js"
 import Session from "../models/session.model.js"
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js"
+import jwt from "jsonwebtoken"
 
 
 const signup = async(req, res) => {
@@ -95,7 +96,7 @@ const signup = async(req, res) => {
    
 }
 
-const verifyEmail = async(req,res) => {
+const verifyEmail = async(req, res) => {
     try {
             const { email, otp } = req.body
         
@@ -256,8 +257,88 @@ const login = async(req, res) => {
 
 }
 
+const refreshToken = async(req, res) => {
+    try {
+        const token = req.cookies.refreshToken
+
+        if(!token){
+            return res.status(404).json({
+                message: "Refresh token is required."
+            })
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET)
+
+        const session = await Session.findById(decoded.sessionId)
+        if(!session){
+            return res.status(401).json({
+                message: "Invalid Session."
+            })
+        }
+
+        if(session.revokedAt){
+            return res.status(401).json({
+                message: "Session has been revoked."
+            })
+        }
+
+        if(session.expiresAt < new Date()){
+            return res.status(401).json({
+                message: "Session has expired."
+            })
+        }
+
+        const isRefreshTokenValid = await bcrypt.compare(token, session.refreshTokenHash)
+        if(!isRefreshTokenValid){
+            return res.status(401).json({
+                message: "Invalid refresh token."
+            })
+        }
+
+        const user = await User.findById(decoded.userId)
+        if(!user){
+            return res.status(401).json({
+                message: "User not found."
+            })
+        }
+
+        const newAccessToken = generateAccessToken(user)
+        const newRefreshToken = generateRefreshToken(user, session._id)
+
+        const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, 10)
+
+        session.refreshTokenHash = newRefreshToken
+
+        await session.save()
+
+        res.cookie("accessToken", newAccessToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 15 * 60 * 1000, 
+        })
+
+        res.cookie("refreshToken", newRefreshToken, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+
+        return res.status(200).json({
+            message: "Tokens refreshed successfully."
+        })
+
+    } catch (error) {
+        console.log("Refresh token error:", error)
+
+        return res.status(401).json({
+            message: "Invalid or expired refresh token."
+        })
+    }
+}
 
 
 
 
-export { signup, verifyEmail, login }
+export { signup, verifyEmail, login, refreshToken }
