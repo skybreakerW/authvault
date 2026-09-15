@@ -338,7 +338,52 @@ const refreshToken = async(req, res) => {
     }
 }
 
+const logout = async(req, res) => {
+    try {
+        const token = req.cookies.refreshToken
+        if(token){
+            try {
+                const decoded = jwt.verify(
+                    token,
+                    process.env.JWT_REFRESH_SECRET
+                )
+
+                const session = await Session.findById(decoded.sessionId)
+
+                if(session && !session.revokedAt){
+                    session.revokedAt = new Date()
+                    await session.save()
+                }
+            } catch (error) {
+                console.log("Logout token error:", error)
+            }
+        }
+
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax"
+        })
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+        })
+
+        return res.status(200).json({
+            message: "Logged out successfully."
+        })
+
+    } catch (error) {
+        console.log("Logout error:", error)
+
+        return res.status(500).json({
+            message: "Something went wrong."
+        })
+    }
+}
 
 
 
-export { signup, verifyEmail, login, refreshToken }
+export { signup, verifyEmail, login, refreshToken, logout }
