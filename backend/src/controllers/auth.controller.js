@@ -8,6 +8,7 @@ import Session from "../models/session.model.js"
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js"
 import jwt from "jsonwebtoken"
 import PasswordReset from "../models/passwordReset.model.js"
+import { createSignedCSRFToken } from "../utils/csrf.js"
 
 const signup = async(req, res) => {
 
@@ -374,6 +375,12 @@ const logout = async(req, res) => {
             sameSite: "lax",
         })
 
+        res.clearCookie("csrfToken", {
+            httpOnly: false,
+            secure: false,
+            sameSite: "lax",
+        })
+
         return res.status(200).json({
             message: "Logged out successfully."
         })
@@ -417,6 +424,12 @@ const logoutAll = async(req, res) => {
 
         res.clearCookie("refreshToken", {
             httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+        })
+
+        res.clearCookie("csrfToken", {
+            httpOnly: false,
             secure: false,
             sameSite: "lax",
         })
@@ -804,4 +817,27 @@ const resendVerification = async (req, res) => {
     }
 }
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification }
+const getCSRFToken = (req, res) => {
+    const existingToken = req.cookies.csrfToken
+
+    if (existingToken) {
+        return res.status(200).json({
+            csrfToken: existingToken
+        })
+    }
+
+    const csrfToken = generateCSRFToken()
+
+    res.cookie("csrfToken", csrfToken, {
+        httpOnly: false,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 15 * 60 * 1000,
+    })
+
+    return res.status(200).json({
+        csrfToken
+    })
+}
+
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification, getCSRFToken }

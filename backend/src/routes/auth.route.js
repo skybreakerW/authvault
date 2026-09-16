@@ -1,23 +1,26 @@
 import express from "express";
-import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification } from "../controllers/auth.controller.js";
+import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification, getCSRFToken } from "../controllers/auth.controller.js";
 import authenticateUser from "../middlewares/auth.middleware.js"
 import requireAdmin from "../middlewares/admin.middleware.js"
 import { getMySessions, revokeSession } from "../controllers/session.controller.js"
 import { loginRateLimiter,otpRequestRateLimiter,otpVerificationRateLimiter, refreshTokenRateLimiter } from "../middlewares/rateLimit.middleware.js"
+import csrfProtection from "../middlewares/csrf.middleware.js"
 
 const router = express.Router()
 
 router.post("/signup", signup)
-router.post("/verify-email", otpVerificationRateLimiter, verifyEmail)
+router.post("/verify-email", otpVerificationRateLimiter, csrfProtection, verifyEmail)
 router.post("/login", loginRateLimiter, login)
 router.post("/refresh", refreshTokenRateLimiter, refreshToken)
-router.post("/logout", logout)
-router.post("/logout-all", logoutAll)
-router.post("/forgot-password", otpRequestRateLimiter, forgotPassword)
-router.post("/verify-reset-otp", otpVerificationRateLimiter, verifyResetOTP)
-router.post("/reset-password", resetPassword)
-router.post("/logout-other-devices", logoutOtherDevices)
-router.post("/resend-verification", otpRequestRateLimiter, resendVerification)
+router.post("/logout", csrfProtection, logout)
+router.post("/logout-all", csrfProtection, logoutAll)
+router.post("/forgot-password", otpRequestRateLimiter, csrfProtection, forgotPassword)
+router.post("/verify-reset-otp", otpVerificationRateLimiter, csrfProtection, verifyResetOTP)
+router.post("/reset-password", csrfProtection, resetPassword)
+router.post("/logout-other-devices", csrfProtection, logoutOtherDevices)
+router.post("/resend-verification", otpRequestRateLimiter, csrfProtection, resendVerification)
+
+router.get("/csrf-token", getCSRFToken)
 
 router.get(
     "/me",
@@ -33,17 +36,9 @@ router.get(
         })
     })
 
-router.get(
-    "/sessions",
-    authenticateUser,
-    getMySessions
-)
+router.get("/sessions", authenticateUser, getMySessions)
 
-router.delete(
-    "/sessions/:sessionId",
-    authenticateUser,
-    revokeSession
-)
+router.delete("/sessions/:sessionId", authenticateUser, csrfProtection, revokeSession)
 
 
 export default router
