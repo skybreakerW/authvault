@@ -891,7 +891,7 @@ const getCSRFToken = (req, res) => {
         })
     }
 
-    const csrfToken = generateCSRFToken()
+    const csrfToken = createSignedCSRFToken()
 
     res.cookie("csrfToken", csrfToken, {
         httpOnly: false,
