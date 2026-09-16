@@ -207,6 +207,9 @@ const login = async(req, res) => {
         const session = await Session.create({
             user: user._id,
             refreshTokenHash: "temporary",
+            userAgent: req.get("User-Agent"),
+            ipAddress: req.ip,
+            lastUsedAt: new Date(),
             expiresAt: new Date(
                 Date.now() + 7 * 24 * 60 * 60 * 1000
             )

@@ -7,10 +7,22 @@ const sessionSchema = new mongoose.Schema(
             ref: "User",
             required: true
         },
-
         refreshTokenHash: {
             type: String,
             required: true,
+        }, 
+        userAgent: {
+            type: String,
+            default: null,
+        },
+
+        ipAddress: {
+            type: String,
+            default: null,
+        },
+        lastUsedAt: {
+            type: Date,
+            default: null,
         },
         expiresAt: {
             type: Date,
@@ -20,7 +32,7 @@ const sessionSchema = new mongoose.Schema(
         revokedAt: {
             type: Date,
             default: null,
-        }
+        },
     },
     {
         timestamps: true
