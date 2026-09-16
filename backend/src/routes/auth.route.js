@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification, getCSRFToken } from "../controllers/auth.controller.js";
+import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification, getCSRFToken, changePassword } from "../controllers/auth.controller.js";
 import authenticateUser from "../middlewares/auth.middleware.js"
 import requireAdmin from "../middlewares/admin.middleware.js"
 import { getMySessions, revokeSession } from "../controllers/session.controller.js"
@@ -19,6 +19,7 @@ router.post("/verify-reset-otp", otpVerificationRateLimiter, csrfProtection, ver
 router.post("/reset-password", csrfProtection, resetPassword)
 router.post("/logout-other-devices", csrfProtection, logoutOtherDevices)
 router.post("/resend-verification", otpRequestRateLimiter, csrfProtection, resendVerification)
+router.post("/change-password", authenticateUser, csrfProtection, changePassword)
 
 router.get("/csrf-token", getCSRFToken)
 

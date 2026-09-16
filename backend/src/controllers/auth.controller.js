@@ -9,6 +9,7 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token.js"
 import jwt from "jsonwebtoken"
 import PasswordReset from "../models/passwordReset.model.js"
 import { createSignedCSRFToken } from "../utils/csrf.js"
+import { isPasswordReused } from "../services/password.service.js"
 
 const signup = async(req, res) => {
 
@@ -656,10 +657,25 @@ const resetPassword = async(req, res) => {
             })
         }
 
+        const isReused = await isPasswordReused(
+            newPassword,
+            user.passwordHistory
+        )
+
+        if (isReused) {
+            return res.status(400).json({
+                message: "You cannot reuse a recent password."
+            })
+        }
+
         const hashedPassword = await bcrypt.hash(
             newPassword,
             10
         )
+
+        user.passwordHistory.unshift(user.password)
+        user.passwordHistory = user.passwordHistory.slice(0, 3)
+        user.password = hashedPassword
 
         user.password = hashedPassword
 
@@ -840,4 +856,99 @@ const getCSRFToken = (req, res) => {
     })
 }
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification, getCSRFToken }
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                message: "Current password and new password are required."
+            })
+        }
+
+        if (!isValidPassword(newPassword)) {
+            return res.status(400).json({
+                message: "Password must be at least 8 characters long."
+            })
+        }
+
+        const user = await User.findById(req.user._id)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found."
+            })
+        }
+
+        const isCurrentPasswordValid = await bcrypt.compare(
+            currentPassword,
+            user.password
+        )
+
+        if (!isCurrentPasswordValid) {
+            return res.status(401).json({
+                message: "Current password is incorrect."
+            })
+        }
+
+        const isReused = await isPasswordReused(
+            newPassword,
+            user.passwordHistory
+        )
+
+        if (isReused) {
+            return res.status(400).json({
+                message: "You cannot reuse a recent password."
+            })
+        }
+
+        const isSameAsCurrent = await bcrypt.compare(
+            newPassword,
+            user.password
+        )
+
+        if (isSameAsCurrent) {
+            return res.status(400).json({
+                message: "New password must be different from your current password."
+            })
+        }
+
+        const hashedPassword = await bcrypt.hash(
+            newPassword,
+            10
+        )
+
+        user.passwordHistory.unshift(user.password)
+
+        user.passwordHistory = user.passwordHistory.slice(0, 3)
+
+        user.password = hashedPassword
+
+        await user.save()
+
+        await Session.updateMany(
+            {
+                user: user._id,
+                revokedAt: null
+            },
+            {
+                $set: {
+                    revokedAt: new Date()
+                }
+            }
+        )
+
+        return res.status(200).json({
+            message: "Password changed successfully. Please log in again."
+        })
+
+    } catch (error) {
+        console.log("Change password error:", error)
+
+        return res.status(500).json({
+            message: "Something went wrong."
+        })
+    }
+}
+
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification, getCSRFToken, changePassword }

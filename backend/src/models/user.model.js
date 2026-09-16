@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema(
             required: true,
             minlength: 8
         },
+        passwordHistory: {
+            type: [String],
+            default: [],
+        },
         role: {
             type: String,
             enum: ["user", "admin"],
