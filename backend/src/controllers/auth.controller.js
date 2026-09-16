@@ -10,6 +10,8 @@ import jwt from "jsonwebtoken"
 import PasswordReset from "../models/passwordReset.model.js"
 import { createSignedCSRFToken } from "../utils/csrf.js"
 import { isPasswordReused } from "../services/password.service.js"
+import PasswordResetToken from "../models/passwordResetToken.model.js"
+import { hashToken } from "../utils/hash.js"
 
 const signup = async(req, res) => {
 
@@ -464,13 +466,13 @@ const forgotPassword = async(req, res) => {
         })
         if(!user){
             return res.status(404).json({
-                message: "If an account exists, a reset code has been sent."
+                message: "If an account exists for this email, a password reset OTP has been sent."
             })
         }
 
         if(!user.isEmailVerified){
             return res.status(403).json({
-                message: "Please verify your email first."
+                message: "If an account exists for this email, a password reset OTP has been sent."
             })
         }
 
@@ -489,13 +491,18 @@ const forgotPassword = async(req, res) => {
             })
         }
 
+        const hashedOTP = await bcrypt.hash(
+            otp,
+            10
+        )
+
         await PasswordReset.deleteMany({
             user: user._id
         })
 
         await PasswordReset.create({
             user: user._id,
-            otp,
+            otp: hashedOTP,
             expiresAt,
         })
 
@@ -587,10 +594,19 @@ const verifyResetOTP = async (req, res) => {
         resetRequest.attempts += 1
         await resetRequest.save()
 
-        if (otp !== resetRequest.otp) {
-            return res.status(400).json({
-                message: "Invalid OTP."
-            })
+        const isOTPValid = await bcrypt.compare(
+            otp,
+            resetRecord.otp
+        )
+
+        if (!isOTPValid) {
+            resetRecord.attempts += 1
+
+        await resetRecord.save()
+
+        return res.status(400).json({
+            message: "Invalid OTP."
+        })
         }
 
         const resetToken = jwt.sign(
@@ -604,8 +620,18 @@ const verifyResetOTP = async (req, res) => {
             }
         )
 
-        await PasswordReset.deleteOne({
-            _id: resetRequest._id
+        const tokenHash = hashToken(resetToken)
+
+        await PasswordResetToken.deleteMany({
+            user: user._id
+        })
+
+        await PasswordResetToken.create({
+            user: user._id,
+            tokenHash,
+            expiresAt: new Date(
+                Date.now() + 15 * 60 * 1000
+            )
         })
 
         return res.status(200).json({
@@ -646,6 +672,27 @@ const resetPassword = async(req, res) => {
         if (decoded.purpose !== "password-reset") {
             return res.status(401).json({
                 message: "Invalid reset token."
+            })
+        }
+
+        const tokenHash = hashToken(resetToken)
+
+        const resetTokenRecord = await PasswordResetToken.findOne({
+            user: decoded.userId,
+            tokenHash,
+        })
+
+        if (!resetTokenRecord) {
+            return res.status(401).json({
+                message: "Invalid or expired reset token."
+            })
+        }
+
+        if (resetTokenRecord.expiresAt < new Date()) {
+            await resetTokenRecord.deleteOne()
+
+            return res.status(401).json({
+                message: "Invalid or expired reset token."
             })
         }
 
@@ -692,6 +739,8 @@ const resetPassword = async(req, res) => {
                 }
             }
         )
+
+        await resetTokenRecord.deleteOne()
 
         return res.status(200).json({
             message: "Password reset successfully."
