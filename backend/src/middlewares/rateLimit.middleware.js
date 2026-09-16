@@ -27,8 +27,13 @@ const otpVerificationRateLimiter = rateLimit({
     }
 })
 
-export {
-    loginRateLimiter,
-    otpRequestRateLimiter,
-    otpVerificationRateLimiter
-}
+const refreshTokenRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
+
+    message: {
+        message: "Too many token refresh requests. Please try again later."
+    }
+})
+
+export { loginRateLimiter, otpRequestRateLimiter, otpVerificationRateLimiter, refreshTokenRateLimiter }
