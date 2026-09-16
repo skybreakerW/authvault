@@ -3,21 +3,21 @@ import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPass
 import authenticateUser from "../middlewares/auth.middleware.js"
 import requireAdmin from "../middlewares/admin.middleware.js"
 import { getMySessions, revokeSession } from "../controllers/session.controller.js"
-import { loginRateLimiter } from "../middlewares/rateLimit.middleware.js"
+import { loginRateLimiter,otpRequestRateLimiter,otpVerificationRateLimiter } from "../middlewares/rateLimit.middleware.js"
 
 const router = express.Router()
 
 router.post("/signup", signup)
-router.post("/verify-email", verifyEmail)
+router.post("/verify-email", otpVerificationRateLimiter, verifyEmail)
 router.post("/login", loginRateLimiter, login)
 router.post("/refresh", refreshToken)
 router.post("/logout", logout)
 router.post("/logout-all", logoutAll)
-router.post("/forgot-password", forgotPassword)
-router.post("/verify-reset-otp", verifyResetOTP)
+router.post("/forgot-password", otpRequestRateLimiter, forgotPassword)
+router.post("/verify-reset-otp", otpVerificationRateLimiter, verifyResetOTP)
 router.post("/reset-password", resetPassword)
 router.post("/logout-other-devices", logoutOtherDevices)
-router.post("/resend-verification", resendVerification)
+router.post("/resend-verification", otpRequestRateLimiter, resendVerification)
 
 router.get(
     "/me",
