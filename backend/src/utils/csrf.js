@@ -55,5 +55,6 @@ const verifySignedCSRFToken = (signedToken) => {
 
 export {
     createSignedCSRFToken,
-    verifySignedCSRFToken
+    verifySignedCSRFToken,
+    generateCSRFToken
 }
