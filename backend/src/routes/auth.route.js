@@ -3,12 +3,13 @@ import { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPass
 import authenticateUser from "../middlewares/auth.middleware.js"
 import requireAdmin from "../middlewares/admin.middleware.js"
 import { getMySessions, revokeSession } from "../controllers/session.controller.js"
+import { loginRateLimiter } from "../middlewares/rateLimit.middleware.js"
 
 const router = express.Router()
 
 router.post("/signup", signup)
 router.post("/verify-email", verifyEmail)
-router.post("/login", login)
+router.post("/login", loginRateLimiter, login)
 router.post("/refresh", refreshToken)
 router.post("/logout", logout)
 router.post("/logout-all", logoutAll)
