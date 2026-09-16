@@ -462,6 +462,19 @@ const forgotPassword = async(req, res) => {
 
         const { otp, expiresAt } = createEmailVerification()
 
+        const existingResetRequest = await PasswordReset.findOne({
+            user: user._id
+        })
+
+        if (
+            existingResetRequest &&
+            existingResetRequest.expiresAt > new Date()
+        ) {
+            return res.status(429).json({
+                message: "A password reset OTP is already active. Please wait before requesting another."
+            })
+        }
+
         await PasswordReset.deleteMany({
             user: user._id
         })
@@ -705,5 +718,90 @@ const logoutOtherDevices = async (req, res) => {
     }
 }
 
+const resendVerification = async (req, res) => {
+    try {
+        const { email } = req.body
 
-export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices }
+        if (!email) {
+            return res.status(400).json({
+                message: "Email is required."
+            })
+        }
+
+        const normalizedEmail = email.trim().toLowerCase()
+
+        const user = await User.findOne({
+            email: normalizedEmail
+        })
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Unable to process verification request."
+            })
+        }
+
+        if (user.isEmailVerified) {
+            return res.status(400).json({
+                message: "Email is already verified."
+            })
+        }
+
+        const existingVerification = await EmailVerification.findOne({
+            user: user._id
+        })
+
+        if (
+            existingVerification &&
+            existingVerification.expiresAt > new Date()
+        ) {
+            return res.status(429).json({
+                message: "A verification OTP is already active. Please wait before requesting another."
+            })
+        }
+
+        await EmailVerification.deleteMany({
+            user: user._id
+        })
+
+        const { otp, expiresAt } = createEmailVerification()
+
+        await EmailVerification.create({
+            user: user._id,
+            otp,
+            expiresAt,
+        })
+
+        try {
+            await sendVerificationEmail(
+                user.email,
+                otp
+            )
+        } catch (error) {
+            console.error(
+                "Resend verification email failed:",
+                error
+            )
+
+            await EmailVerification.deleteMany({
+                user: user._id
+            })
+
+            return res.status(500).json({
+                message: "Unable to send verification email."
+            })
+        }
+
+        return res.status(200).json({
+            message: "Verification OTP sent successfully."
+        })
+
+    } catch (error) {
+        console.log("Resend verification error:", error)
+
+        return res.status(500).json({
+            message: "Something went wrong."
+        })
+    }
+}
+
+export { signup, verifyEmail, login, refreshToken, logout, logoutAll, forgotPassword, verifyResetOTP, resetPassword, logoutOtherDevices, resendVerification }
