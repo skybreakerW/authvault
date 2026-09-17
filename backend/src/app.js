@@ -3,12 +3,18 @@ import helmet from "helmet"
 import authRouter from "./routes/auth.route.js"
 import cookieParser from "cookie-parser"
 import adminRouter from "./routes/admin.route.js"
+import cors from "cors"
 
 const app = express()
 
 app.use(helmet())
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    })
+)
 
 app.use("/api/admin", adminRouter)
 app.use("/api/auth", authRouter)

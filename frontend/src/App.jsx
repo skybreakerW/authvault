@@ -1,13 +1,28 @@
-
+import { useEffect } from "react"
+import api from "./services/api.js"
 
 function App() {
 
-  return (
-    <div className="min-h-screen bg-slate=600">
-      <h1 className="text-4xl">AuthVault</h1>
-      <p>Secure authentication platform</p>
-    </div>
-  )
+    useEffect(() => {
+        const testBackend = async () => {
+            try {
+                const response = await api.get("/api/health")
+
+                console.log("Backend response:", response.data)
+            } catch (error) {
+                console.error("Backend connection failed:", error)
+            }
+        }
+
+        testBackend()
+    }, [])
+
+    return (
+        <div>
+            <h1>AuthVault</h1>
+            <p>Secure authentication platform</p>
+        </div>
+    )
 }
 
 export default App
