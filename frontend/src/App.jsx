@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom"
 
 import Signup from "./pages/Signup.jsx"
 import VerifyEmail from "./pages/VerifyEmail.jsx"
+import Login from "./pages/Login.jsx"
 
 const App = () => {
     return (
@@ -20,6 +21,11 @@ const App = () => {
         <Route
             path="/verify-email"
             element={<VerifyEmail />}
+        />
+
+        <Route
+            path="/login"
+            element={<Login />}
         />
     </Routes>
         
