@@ -1,53 +1,15 @@
-import { Routes, Route, Link } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 
 import { useAuth } from "./context/AuthContext.jsx"
 
+import Home from "./pages/Home.jsx"
 import Signup from "./pages/Signup.jsx"
 import VerifyEmail from "./pages/VerifyEmail.jsx"
 import Login from "./pages/Login.jsx"
+import Dashboard from "./pages/Dashboard.jsx"
 
-const Home = () => {
-    const { user, loading } = useAuth()
+import ProtectedRoute from "./components/ProtectedRoute.jsx"
 
-    if (loading) {
-        return <p>Loading...</p>
-    }
-
-    if (!user) {
-        return (
-            <div>
-                <h1>Welcome to AuthVault</h1>
-
-                <p>
-                    Secure authentication for your application.
-                </p>
-
-                <Link to="/signup">
-                    Sign up
-                </Link>
-
-                {" | "}
-
-                <Link to="/login">
-                    Login
-                </Link>
-            </div>
-        )
-    }
-
-    return (
-        <div>
-            <h1>Welcome, {user.name}</h1>
-
-            <p>Email: {user.email}</p>
-            <p>Role: {user.role}</p>
-
-            <Link to="/dashboard">
-                Dashboard
-            </Link>
-        </div>
-    )
-}
 
 const App = () => {
     return (
@@ -71,6 +33,15 @@ const App = () => {
         <Route
             path="/login"
             element={<Login />}
+        />
+
+        <Route
+            path="/dashboard"
+            element={
+            <ProtectedRoute>
+                <Dashboard />
+            </ProtectedRoute>
+            }
         />
     </Routes>
         
