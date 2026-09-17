@@ -38,8 +38,8 @@ const Login = () => {
             )
 
             setUser(response.data.user)
-
             navigate("/")
+            
         } catch (error) {
             setError(
                 error.response?.data?.message ||
