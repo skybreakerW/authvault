@@ -1,26 +1,20 @@
-import { useEffect } from "react"
-import api from "./services/api.js"
+import { useAuth } from "./context/AuthContext.jsx"
 
 function App() {
 
-    useEffect(() => {
-        const testBackend = async () => {
-            try {
-                const response = await api.get("/api/health")
-
-                console.log("Backend response:", response.data)
-            } catch (error) {
-                console.error("Backend connection failed:", error)
-            }
-        }
-
-        testBackend()
-    }, [])
+    const { user, loading } = useAuth()
 
     return (
         <div>
             <h1>AuthVault</h1>
-            <p>Secure authentication platform</p>
+
+            <p>
+                User: {user ? user.name : "Not authenticated"}
+            </p>
+
+            <p>
+                Loading: {loading ? "Yes" : "No"}
+            </p>
         </div>
     )
 }
