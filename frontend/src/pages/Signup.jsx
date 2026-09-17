@@ -1,8 +1,10 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import api from "../services/api.js"
 
 const Signup = () => {
 
+    const navigate = useNavigate()
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -35,18 +37,16 @@ const Signup = () => {
                 formData
             )
 
-            setMessage(response.data.message)
+            navigate(
+            `/verify-email?email=${encodeURIComponent(formData.email)}`
+            )
 
-            setFormData({
-                name: "",
-                email: "",
-                password: "",
-            })
         } catch (error) {
             setError(
                 error.response?.data?.message ||
                 "Something went wrong."
             )
+            
         } finally {
             setLoading(false)
         }
