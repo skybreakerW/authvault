@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import api from "../services/api.js"
+import getCSRFToken from "../services/csrf.js"
 
 const VerifyEmail = () => {
 
@@ -52,10 +53,12 @@ const VerifyEmail = () => {
     }
 
     useEffect(() => {
-    const getCSRFToken = async () => {
+    const fetchCSRFToken = async () => {
         try {
-            const response = await api.get("/api/auth/csrf-token")
-            setCsrfToken(response.data.csrfToken)
+            const token = await getCSRFToken()
+
+            setCsrfToken(token)
+
         } catch (error) {
             console.error(
                 "Failed to get CSRF token:",

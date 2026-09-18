@@ -37,18 +37,24 @@ const Login = () => {
                 formData
             )
 
-            setUser(response.data.user)
-            navigate("/")
+            setUser({
+                id: response.data.id,
+                name: response.data.name,
+                email: response.data.email,
+                role: response.data.role,
+            })
+
+            navigate("/dashboard")
             
         } catch (error) {
             setError(
                 error.response?.data?.message ||
                 "Something went wrong."
-            )
+                )
         } finally {
-            setLoading(false)
-        }
-    }
+                    setLoading(false)
+                }
+            }
 
     return (
         <div>
