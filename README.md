@@ -353,7 +353,6 @@ authvault/
 │   └── package.json
 │
 ├── .gitignore
-├── package.json
 └── README.md
 ```
 
