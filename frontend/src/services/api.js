@@ -20,13 +20,7 @@ api.interceptors.response.use(
         ) {
             originalRequest._retry = true
 
-            console.log("Access token expired. Refreshing...")
-
             await refreshAccessToken()
-
-            console.log(
-                "Access token refreshed. Retrying request..."
-            )
 
             return api(originalRequest)
         }
