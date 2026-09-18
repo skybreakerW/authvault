@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import api from "../services/api.js"
+import {
+    logout as logoutUser,
+    logoutAll as logoutAllUser,
+    logoutOtherDevices as logoutOtherDevicesUser,
+} from "../services/auth.js"
 
 const AuthContext = createContext(null)
 
@@ -21,8 +26,24 @@ const AuthProvider = ({ children }) => {
                 setLoading(false)
             }
         }
-        checkAuth()
+            checkAuth()
     }, [])
+
+    const logout = async () => {
+    await logoutUser()
+
+    setUser(null)
+    }
+
+    const logoutAll = async () => {
+    await logoutAllUser()
+
+    setUser(null)
+    }
+
+    const logoutOtherDevices = async () => {
+    await logoutOtherDevicesUser()
+    }
 
     return (
         <AuthContext.Provider
@@ -30,6 +51,9 @@ const AuthProvider = ({ children }) => {
                 user,
                 loading,
                 setUser,
+                logout,
+                logoutAll,
+                logoutOtherDevices,
             }}
         >
             {children}

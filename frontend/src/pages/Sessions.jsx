@@ -27,10 +27,6 @@ const Sessions = () => {
                 )
             )
         } catch (error) {
-            console.log(
-                "Revoke session error:",
-                error.response?.data
-            )
 
             setError(
                 error.response?.data?.message ||
@@ -45,17 +41,8 @@ const Sessions = () => {
                     "/api/auth/sessions"
                 )
 
-                console.log(
-                    "Sessions response:",
-                    response.data
-                )
-
                 setSessions(response.data.sessions)
             } catch (error) {
-                console.log(
-                    "Sessions error:",
-                    error.response?.data
-                )
 
                 setError(
                     error.response?.data?.message ||
