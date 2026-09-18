@@ -15,7 +15,7 @@ import VerifyResetOtp from "./pages/VerifyResetOtp.jsx"
 import ResetPassword from "./pages/ResetPassword.jsx"
 import ChangePassword from "./pages/ChangePassword.jsx"
 import AdminUsers from "./pages/AdminUsers.jsx"
-
+import NotFound from "./pages/NotFound.jsx"
 
 
 
@@ -94,6 +94,10 @@ const App = () => {
                         </AdminRoute>
                     </ProtectedRoute>
                 }
+            />
+            <Route
+                path="*"
+                element={<NotFound />}
             />
         </Routes>
     </Layout>
