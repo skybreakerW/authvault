@@ -596,13 +596,13 @@ const verifyResetOTP = async (req, res) => {
 
         const isOTPValid = await bcrypt.compare(
             otp,
-            resetRecord.otp
+            resetRequest.otp
         )
 
         if (!isOTPValid) {
-            resetRecord.attempts += 1
+            resetRequest.attempts += 1
 
-        await resetRecord.save()
+        await resetRequest.save()
 
         return res.status(400).json({
             message: "Invalid OTP."
