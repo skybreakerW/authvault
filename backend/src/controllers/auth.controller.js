@@ -12,6 +12,7 @@ import { createSignedCSRFToken } from "../utils/csrf.js"
 import { isPasswordReused } from "../services/password.service.js"
 import PasswordResetToken from "../models/passwordResetToken.model.js"
 import { hashToken } from "../utils/hash.js"
+import { authCookieOptions, csrfCookieOptions } from "../configs/cookie.js"
 
 const signup = async(req, res) => {
 
@@ -231,16 +232,12 @@ const login = async(req, res) => {
         await session.save()
 
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions,
             maxAge: 15 * 60 * 1000,
         })
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
 
@@ -319,16 +316,12 @@ const refreshToken = async(req, res) => {
         await session.save()
 
         res.cookie("accessToken", newAccessToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions,
             maxAge: 15 * 60 * 1000, 
         })
 
         res.cookie("refreshToken", newRefreshToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
 
@@ -367,21 +360,15 @@ const logout = async(req, res) => {
         }
 
         res.clearCookie("accessToken", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax"
+            ...authCookieOptions
         })
 
         res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions
         })
 
         res.clearCookie("csrfToken", {
-            httpOnly: false,
-            secure: false,
-            sameSite: "lax",
+            ...csrfCookieOptions
         })
 
         return res.status(200).json({
@@ -420,21 +407,15 @@ const logoutAll = async(req, res) => {
         )
 
         res.clearCookie("accesToken", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions,
         })
 
         res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            ...authCookieOptions,
         })
 
         res.clearCookie("csrfToken", {
-            httpOnly: false,
-            secure: false,
-            sameSite: "lax",
+            ...csrfCookieOptions
         })
 
         return res.status(200).json({
@@ -894,10 +875,8 @@ const getCSRFToken = (req, res) => {
     const csrfToken = createSignedCSRFToken()
 
     res.cookie("csrfToken", csrfToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: "lax",
-        maxAge: 15 * 60 * 1000,
+        ...csrfCookieOptions,
+        maxAge: 15 * 60 * 1000
     })
 
     return res.status(200).json({
