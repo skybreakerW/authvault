@@ -10,8 +10,14 @@ const getMySessions = async (req, res) => {
             .select("-refreshTokenHash")
             .sort({ createdAt: -1 })
 
+        const sessionsWithCurrentStatus = sessions.map((session) => ({
+            ...session.toObject(),
+            isCurrent:
+            session._id.toString() === req.sessionId
+        }))
+
         return res.status(200).json({
-            sessions
+            sessions: sessionsWithCurrentStatus
         })
 
     } catch (error) {
@@ -21,7 +27,7 @@ const getMySessions = async (req, res) => {
             message: "Something went wrong."
         })
     }
-}
+        }
 
 const revokeSession = async (req, res) => {
     try {

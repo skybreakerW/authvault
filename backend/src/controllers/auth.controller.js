@@ -219,7 +219,7 @@ const login = async(req, res) => {
             )
         })
 
-        const accessToken = generateAccessToken(user)
+        const accessToken = generateAccessToken(user, session._id)
         const refreshToken = generateRefreshToken(
             user,
             session._id,
@@ -309,7 +309,7 @@ const refreshToken = async(req, res) => {
             })
         }
 
-        const newAccessToken = generateAccessToken(user)
+        const newAccessToken = generateAccessToken(user,session._id)
         const newRefreshToken = generateRefreshToken(user, session._id)
 
         const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, 10)

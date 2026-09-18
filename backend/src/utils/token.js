@@ -3,11 +3,12 @@ import jwt from "jsonwebtoken"
 const ACCESS_TOKEN_EXPIRY = "15m"
 const REFRESH_TOKEN_EXPIRY = "7d"
 
-const generateAccessToken = (user) => {
+const generateAccessToken = (user, sessionId) => {
     return jwt.sign(
         {
             userId: user._id,
-            role: user.role
+            role: user.role,
+            sessionId,
         },
         process.env.JWT_ACCESS_SECRET,
         {

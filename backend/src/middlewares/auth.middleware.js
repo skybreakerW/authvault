@@ -25,6 +25,7 @@ const authenticateUser = async (req, res, next) => {
         }
 
         req.user = user
+        req.sessionId = decoded.sessionId
 
         next()
 
