@@ -12,6 +12,8 @@ import ForgotPassword from "./pages/ForgotPassword.jsx"
 import VerifyResetOtp from "./pages/VerifyResetOtp.jsx"
 import ResetPassword from "./pages/ResetPassword.jsx"
 import ChangePassword from "./pages/ChangePassword.jsx"
+import AdminUsers from "./pages/AdminUsers.jsx"
+import AdminRoute from "./components/AdminRoute.jsx"
 
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
 
@@ -78,6 +80,26 @@ const App = () => {
             element={
                 <ProtectedRoute>
                     <ChangePassword />
+                </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/admin/users"
+            element={
+                <ProtectedRoute>
+                    <AdminUsers />
+                </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/admin/users"
+            element={
+                <ProtectedRoute>
+                    <AdminRoute>
+                        <AdminUsers />
+                    </AdminRoute>
                 </ProtectedRoute>
             }
         />

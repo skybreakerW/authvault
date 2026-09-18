@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext.jsx"
 
 const DashboardNav = () => {
     const { logout, logoutAll, logoutOtherDevices } = useAuth()
+    const { user } = useAuth()
 
     const handleLogout = async () => {
     try {
@@ -47,6 +48,12 @@ const DashboardNav = () => {
                 Change Password
             </Link>
             {" | "}
+            {user?.role === "admin" && (
+                <Link to="/admin/users">
+                    Admin Users
+                </Link>
+            )}
+            {" | "}
             <button onClick={handleLogout}>
                 Logout
             </button>
@@ -58,6 +65,7 @@ const DashboardNav = () => {
             <button onClick={handleLogoutOtherDevices}>
                 Logout Other Devices
             </button>
+            
         </nav>
     )
 }
