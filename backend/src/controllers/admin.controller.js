@@ -3,7 +3,7 @@ import User from "../models/user.model.js"
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.find()
-            .select("-password")
+            .select("-password -passwordHistory")
 
         return res.status(200).json({
             users
