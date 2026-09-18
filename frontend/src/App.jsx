@@ -8,6 +8,9 @@ import VerifyEmail from "./pages/VerifyEmail.jsx"
 import Login from "./pages/Login.jsx"
 import Dashboard from "./pages/Dashboard.jsx"
 import Sessions from "./pages/Sessions.jsx"
+import ForgotPassword from "./pages/ForgotPassword.jsx"
+import VerifyResetOtp from "./pages/VerifyResetOtp.jsx"
+import ResetPassword from "./pages/ResetPassword.jsx"
 
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
 
@@ -53,7 +56,23 @@ const App = () => {
             </ProtectedRoute>
             }
         />
+
+        <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+        />
+
+        <Route
+            path="/verify-reset-otp"
+            element={<VerifyResetOtp />}
+        />
+
+        <Route
+            path="/reset-password"
+            element={<ResetPassword />}
+        />
     </Routes>
+    
         
     )
 }
