@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom"
 
-import { useAuth } from "./context/AuthContext.jsx"
+import AdminRoute from "./components/AdminRoute.jsx"
+import ProtectedRoute from "./components/ProtectedRoute.jsx"
+import Layout from "./components/Layout.jsx"
 
 import Home from "./pages/Home.jsx"
 import Signup from "./pages/Signup.jsx"
@@ -13,89 +15,88 @@ import VerifyResetOtp from "./pages/VerifyResetOtp.jsx"
 import ResetPassword from "./pages/ResetPassword.jsx"
 import ChangePassword from "./pages/ChangePassword.jsx"
 import AdminUsers from "./pages/AdminUsers.jsx"
-import AdminRoute from "./components/AdminRoute.jsx"
 
-import ProtectedRoute from "./components/ProtectedRoute.jsx"
+
 
 
 const App = () => {
     return (
-        
-    <Routes>
-        <Route
-            path="/"
-            element={<Home />}
-        />
+    <Layout>
+        <Routes>
+            <Route
+                path="/"
+                element={<Home />}
+            />
 
-        <Route
-            path="/signup"
-            element={<Signup />}
-        />
+            <Route
+                path="/signup"
+                element={<Signup />}
+            />
 
-        <Route
-            path="/verify-email"
-            element={<VerifyEmail />}
-        />
+            <Route
+                path="/verify-email"
+                element={<VerifyEmail />}
+            />
 
-        <Route
-            path="/login"
-            element={<Login />}
-        />
+            <Route
+                path="/login"
+                element={<Login />}
+            />
 
-        <Route
-            path="/dashboard"
-            element={
-            <ProtectedRoute>
-                <Dashboard />
-            </ProtectedRoute>
-            }
-        />
-
-        <Route
-            path="/sessions"
-            element={
-            <ProtectedRoute>
-                <Sessions />
-            </ProtectedRoute>
-            }
-        />
-
-        <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-        />
-
-        <Route
-            path="/verify-reset-otp"
-            element={<VerifyResetOtp />}
-        />
-
-        <Route
-            path="/reset-password"
-            element={<ResetPassword />}
-        />
-
-        <Route
-            path="/change-password"
-            element={
+            <Route
+                path="/dashboard"
+                element={
                 <ProtectedRoute>
-                    <ChangePassword />
+                    <Dashboard />
                 </ProtectedRoute>
-            }
-        />
+                }
+            />
 
-        <Route
-            path="/admin/users"
-            element={
+            <Route
+                path="/sessions"
+                element={
                 <ProtectedRoute>
-                    <AdminRoute>
-                        <AdminUsers />
-                    </AdminRoute>
+                    <Sessions />
                 </ProtectedRoute>
-            }
-        />
-    </Routes>
-    
+                }
+            />
+
+            <Route
+                path="/forgot-password"
+                element={<ForgotPassword />}
+            />
+
+            <Route
+                path="/verify-reset-otp"
+                element={<VerifyResetOtp />}
+            />
+
+            <Route
+                path="/reset-password"
+                element={<ResetPassword />}
+            />
+
+            <Route
+                path="/change-password"
+                element={
+                    <ProtectedRoute>
+                        <ChangePassword />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/admin/users"
+                element={
+                    <ProtectedRoute>
+                        <AdminRoute>
+                            <AdminUsers />
+                        </AdminRoute>
+                    </ProtectedRoute>
+                }
+            />
+        </Routes>
+    </Layout>
         
     )
 }

@@ -1,20 +1,17 @@
 import { Navigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext.jsx"
+import PageLoader from "./PageLoader.jsx"
 
 const AdminRoute = ({ children }) => {
     const { user, loading } = useAuth()
 
-    if (loading) {
-        return <p>Loading...</p>
-    }
+    if (loading) return <PageLoader />
 
-    if (!user) {
-        return <Navigate to="/login" replace />
-    }
+    // Not logged in → login
+    if (!user) return <Navigate to="/login" replace />
 
-    if (user.role !== "admin") {
-        return <Navigate to="/dashboard" replace />
-    }
+    // Logged in but not admin → kick to dashboard
+    if (user.role !== "admin") return <Navigate to="/dashboard" replace />
 
     return children
 }
