@@ -88,15 +88,6 @@ const App = () => {
             path="/admin/users"
             element={
                 <ProtectedRoute>
-                    <AdminUsers />
-                </ProtectedRoute>
-            }
-        />
-
-        <Route
-            path="/admin/users"
-            element={
-                <ProtectedRoute>
                     <AdminRoute>
                         <AdminUsers />
                     </AdminRoute>
