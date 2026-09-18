@@ -9,7 +9,7 @@ const authCookieOptions = {
 const csrfCookieOptions = {
     httpOnly: false,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: isProduction ? "none" : "lax",
 }
 
 export {
