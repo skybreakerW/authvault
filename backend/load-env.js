@@ -7,7 +7,8 @@ dotenv.config({
 const requiredEnv = [
     "DB_URI",
     "JWT_SECRET",
-    // "FRONTEND_URL",
+    "FRONTEND_URL",
+    "NODE_ENV"
 ];
 
 for (const key of requiredEnv) {
