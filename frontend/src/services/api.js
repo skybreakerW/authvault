@@ -21,9 +21,13 @@ api.interceptors.response.use(
         ) {
             originalRequest._retry = true
 
-            await refreshAccessToken()
+            try {
+                await refreshAccessToken()
 
-            return api(originalRequest)
+                return api(originalRequest)
+            } catch (refreshError) {
+                return Promise.reject(refreshError)
+            }
         }
 
         return Promise.reject(error)
