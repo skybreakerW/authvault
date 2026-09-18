@@ -1,39 +1,57 @@
 import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+
 import api from "../services/api.js"
 import getCSRFToken from "../services/csrf.js"
-import { useNavigate } from "react-router-dom"
+import AuthLayout from "../components/AuthLayout.jsx"
+import Input from "../components/Input.jsx"
+import Button from "../components/Button.jsx"
+import StepIndicator from "../components/StepIndicator.jsx"
 
 const ForgotPassword = () => {
+    const navigate = useNavigate()
+
     const [email, setEmail] = useState("")
-    const [message, setMessage] = useState("")
     const [error, setError] = useState("")
+    const [fieldErrors, setFieldErrors] = useState({})
     const [loading, setLoading] = useState(false)
 
-    const navigate = useNavigate()
+    const validate = () => {
+        const errors = {}
+        if (!email.trim()) {
+            errors.email = "Email is required."
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.email = "Enter a valid email address."
+        }
+        return errors
+    }
 
     const handleSubmit = async (event) => {
         event.preventDefault()
 
-        setMessage("")
         setError("")
+
+        const errors = validate()
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors)
+            return
+        }
+
+        setFieldErrors({})
         setLoading(true)
 
         try {
             const csrfToken = await getCSRFToken()
 
-            const response = await api.post(
+            await api.post(
                 "/api/auth/forgot-password",
                 { email },
-                {
-                    headers: {
-                        "X-CSRF-Token": csrfToken,
-                    },
-                }
+                { headers: { "X-CSRF-Token": csrfToken } }
             )
 
-            setMessage(response.data.message)
-            navigate(`/verify-reset-otp?email=${encodeURIComponent(email)}`)
-
+            navigate(
+                `/verify-reset-otp?email=${encodeURIComponent(email)}`
+            )
         } catch (error) {
             setError(
                 error.response?.data?.message ||
@@ -45,45 +63,52 @@ const ForgotPassword = () => {
     }
 
     return (
-        <div>
-            <h1>Forgot Password</h1>
+        <AuthLayout
+            title="Reset your password"
+            subtitle="Enter the email on your account and we'll send a reset code."
+            footer={
+                <>
+                    Remembered it?{" "}
+                    <Link
+                        to="/login"
+                        className="text-emerald-400 hover:text-emerald-300"
+                    >
+                        Back to sign in
+                    </Link>
+                </>
+            }
+        >
+            <StepIndicator step={1} total={3} label="Request code" />
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">
-                        Email
-                    </label>
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                <Input
+                    id="email"
+                    type="email"
+                    label="Email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    error={fieldErrors.email}
+                    required
+                />
 
-                    <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(event) =>
-                            setEmail(event.target.value)
-                        }
-                        required
-                    />
-                </div>
+                {error && (
+                    <div
+                        role="alert"
+                        className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-sm text-rose-300"
+                    >
+                        {error}
+                    </div>
+                )}
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                >
-                    {loading
-                        ? "Sending..."
-                        : "Send Reset OTP"}
-                </button>
+                <Button type="submit" loading={loading}>
+                    {loading ? "Sending..." : "Send reset code"}
+                </Button>
             </form>
-
-            {message && (
-                <p>{message}</p>
-            )}
-
-            {error && (
-                <p>{error}</p>
-            )}
-        </div>
+        </AuthLayout>
     )
 }
+
 
 export default ForgotPassword
