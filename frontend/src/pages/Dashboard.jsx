@@ -11,8 +11,18 @@ const Dashboard = () => {
                 Welcome, {user.name}
             </p>
 
+            <h2>Account Information</h2>
+
             <p>
-                This is a protected page.
+                Name: {user.name}
+            </p>
+
+            <p>
+                Email: {user.email}
+            </p>
+
+            <p>
+                Role: {user.role}
             </p>
         </div>
     )
