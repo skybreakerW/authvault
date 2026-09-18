@@ -7,6 +7,7 @@ import Signup from "./pages/Signup.jsx"
 import VerifyEmail from "./pages/VerifyEmail.jsx"
 import Login from "./pages/Login.jsx"
 import Dashboard from "./pages/Dashboard.jsx"
+import Sessions from "./pages/Sessions.jsx"
 
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
 
@@ -40,6 +41,15 @@ const App = () => {
             element={
             <ProtectedRoute>
                 <Dashboard />
+            </ProtectedRoute>
+            }
+        />
+
+        <Route
+            path="/sessions"
+            element={
+            <ProtectedRoute>
+                <Sessions />
             </ProtectedRoute>
             }
         />
