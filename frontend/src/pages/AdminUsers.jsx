@@ -31,7 +31,19 @@ const AdminUsers = () => {
     }
 
     if (error) {
-        return <p>{error}</p>
+        return (
+        <div>
+            <h1>Admin - Users</h1>
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()}>
+                Try Again
+            </button>
+        </div>
+        )
+    }
+    
+    if (users.length === 0) {
+        return <p>No users found.</p>
     }
 
     return (
@@ -45,6 +57,7 @@ const AdminUsers = () => {
                         <th>Email</th>
                         <th>Role</th>
                         <th>Email Verified</th>
+                        <th>Created At</th>
                     </tr>
                 </thead>
 
@@ -58,6 +71,9 @@ const AdminUsers = () => {
                                 {user.isEmailVerified
                                     ? "Yes"
                                     : "No"}
+                            </td>
+                            <td>
+                                {new Date(user.createdAt).toLocaleDateString()}
                             </td>
                         </tr>
                     ))}
