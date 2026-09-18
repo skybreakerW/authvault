@@ -11,6 +11,7 @@ import Sessions from "./pages/Sessions.jsx"
 import ForgotPassword from "./pages/ForgotPassword.jsx"
 import VerifyResetOtp from "./pages/VerifyResetOtp.jsx"
 import ResetPassword from "./pages/ResetPassword.jsx"
+import ChangePassword from "./pages/ChangePassword.jsx"
 
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
 
@@ -70,6 +71,15 @@ const App = () => {
         <Route
             path="/reset-password"
             element={<ResetPassword />}
+        />
+
+        <Route
+            path="/change-password"
+            element={
+                <ProtectedRoute>
+                    <ChangePassword />
+                </ProtectedRoute>
+            }
         />
     </Routes>
     
