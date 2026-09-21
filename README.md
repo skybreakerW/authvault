@@ -112,6 +112,36 @@ Security-focused features include:
 
 ---
 
+## Screenshots
+
+### Login Flow
+
+![AuthVault Login Flow](./screenshots/LoginFlow.gif)
+
+### Home Page
+
+![AuthVault Home Page](./screenshots/HomePage.png)
+
+### Authentication
+
+![AuthVault Login](./screenshots/Login.png)
+
+![AuthVault Sign Up](./screenshots/SignUp.png)
+
+### Dashboard
+
+![AuthVault Dashboard](./screenshots/Dashboard.png)
+
+### Session Management
+
+![AuthVault Sessions](./screenshots/Sessions.png)
+
+### Admin Panel
+
+![AuthVault Admin Panel](./screenshots/AdminPanel.png)
+
+---
+
 ## Tech Stack
 
 ### Frontend
@@ -342,7 +372,6 @@ authvault/
 │   │   ├── context/
 │   │   ├── pages/
 │   │   ├── services/
-│   │   ├── utils/
 │   │   ├── App.jsx
 │   │   ├── index.css
 │   │   └── main.jsx
@@ -352,6 +381,7 @@ authvault/
 │   ├── vite.config.js
 │   └── package.json
 │
+├── screenshots/
 ├── .gitignore
 └── README.md
 ```
