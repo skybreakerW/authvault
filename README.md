@@ -1,4 +1,7 @@
-# AuthVault
+<h1>
+  <img src="./frontend/public/favicon.svg" width="40" alt="AuthVault icon">
+  AuthVault
+</h1>
 
 A production-ready MERN authentication system focused on secure authentication, session management, email verification, password recovery, and role-based authorization.
 
