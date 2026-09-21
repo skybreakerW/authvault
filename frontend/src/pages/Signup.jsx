@@ -157,7 +157,7 @@ const Signup = () => {
                             focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500"
                     />
                     <LockKeyhole size={20} strokeWidth={1} className="absolute top-1/4 left-4" />
-                    <button 
+                    <button type="button"
                     className="absolute right-4 top-1/4 cursor-pointer"
                     onClick={showPassword}
                     >
