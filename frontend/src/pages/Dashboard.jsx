@@ -1,10 +1,33 @@
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext.jsx"
+import api from "../services/api.js"
 
 const Dashboard = () => {
     const { user } = useAuth()
-
     const isAdmin = user.role === "admin"
+
+    const [sessionCount, setSessionCount] = useState(null)
+    const [sessionsLoading, setSessionsLoading] = useState(true)
+    const [sessionsError, setSessionsError] = useState(false)
+
+    useEffect(() => {
+        const fetchSessions = async () => {
+            try {
+                const response = await api.get("/api/auth/sessions")
+                setSessionCount(response.data.sessions.length)
+            } catch {
+                setSessionsError(true)
+            } finally {
+                setSessionsLoading(false)
+            }
+        }
+
+        fetchSessions()
+    }, [])
+
+    const otherDevices =
+        sessionCount === null ? null : Math.max(sessionCount - 1, 0)
 
     return (
         <main className="mx-auto max-w-6xl px-4 py-10">
@@ -17,19 +40,17 @@ const Dashboard = () => {
                     </h1>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium
-                            ${
-                                isAdmin
-                                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                                    : "border-slate-700 bg-slate-800/60 text-slate-300"
-                            }`}
-                    >
-                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                        {isAdmin ? "Admin" : "Member"}
-                    </span>
-                </div>
+                <span
+                    className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium
+                        ${
+                            isAdmin
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                                : "border-slate-700 bg-slate-800/60 text-slate-300"
+                        }`}
+                >
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                    {isAdmin ? "Admin" : "Member"}
+                </span>
             </div>
 
             {/* Stat cards */}
@@ -46,9 +67,25 @@ const Dashboard = () => {
                     hint={isAdmin ? "Full access" : "Standard access"}
                 />
                 <StatCard
-                    label="Security"
-                    value="JWT"
-                    hint="Session-based auth"
+                    label="Active sessions"
+                    value={
+                        sessionsLoading
+                            ? "—"
+                            : sessionsError
+                            ? "—"
+                            : sessionCount
+                    }
+                    hint={
+                        sessionsLoading
+                            ? "Loading…"
+                            : sessionsError
+                            ? "Couldn't load"
+                            : otherDevices === 0
+                            ? "Just this device"
+                            : otherDevices === 1
+                            ? "1 other device"
+                            : `${otherDevices} other devices`
+                    }
                 />
             </section>
 
@@ -73,9 +110,7 @@ const Dashboard = () => {
                     </h2>
 
                     <div className="mt-5 flex flex-col gap-2">
-                        <ActionLink to="/sessions">
-                            Manage sessions
-                        </ActionLink>
+                        <ActionLink to="/sessions">Manage sessions</ActionLink>
                         <ActionLink to="/change-password">
                             Change password
                         </ActionLink>
@@ -91,13 +126,11 @@ const Dashboard = () => {
     )
 }
 
-/* ---------- Small presentational helpers ---------- */
+/* ---------- Presentational helpers ---------- */
 
 const StatCard = ({ label, value, hint, tone }) => {
     const toneClasses =
-        tone === "emerald"
-            ? "text-emerald-400"
-            : "text-slate-100"
+        tone === "emerald" ? "text-emerald-400" : "text-slate-100"
 
     return (
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
@@ -107,9 +140,7 @@ const StatCard = ({ label, value, hint, tone }) => {
             <p className={`mt-2 text-2xl font-semibold capitalize ${toneClasses}`}>
                 {value}
             </p>
-            {hint && (
-                <p className="mt-1 text-xs text-slate-500">{hint}</p>
-            )}
+            {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
         </div>
     )
 }
