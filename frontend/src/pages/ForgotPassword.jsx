@@ -8,6 +8,8 @@ import Input from "../components/Input.jsx"
 import Button from "../components/Button.jsx"
 import StepIndicator from "../components/StepIndicator.jsx"
 
+import { Mail } from 'lucide-react';
+
 const ForgotPassword = () => {
     const navigate = useNavigate()
 
@@ -81,17 +83,21 @@ const ForgotPassword = () => {
             <StepIndicator step={1} total={3} label="Request code" />
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                <Input
-                    id="email"
-                    type="email"
-                    label="Email"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    error={fieldErrors.email}
-                    required
-                />
+                <div className="relative">
+                    <Input
+                        id="email"
+                        type="email"
+                        label="Email"
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        error={fieldErrors.email}
+                        required
+                        className="px-12"
+                    />
+                    <Mail color="#ffffff" strokeWidth={1} className="absolute top-9 left-3" />
+                </div>
 
                 {error && (
                     <div

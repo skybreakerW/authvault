@@ -140,7 +140,7 @@ const Signup = () => {
                         className="px-12"
                         
                     />
-                    <Mail size={20} strokeWidth={1} className="absolute top-1/2 left-4"/>
+                    <Mail size={20} strokeWidth={1} className="absolute top-9 left-4"/>
                 </div>
                 <div className="relative">
                     <input
@@ -156,7 +156,7 @@ const Signup = () => {
                             placeholder-slate-500 border border-slate-800 transition
                             focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500"
                     />
-                    <LockKeyhole size={20} strokeWidth={1} className="absolute top-1/4 left-4" />
+                    <LockKeyhole size={20} strokeWidth={1} className="absolute top-3 left-4" />
                     <button type="button"
                     className="absolute right-4 top-1/4 cursor-pointer"
                     onClick={showPassword}

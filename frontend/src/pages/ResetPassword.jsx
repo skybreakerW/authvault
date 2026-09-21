@@ -7,6 +7,7 @@ import AuthLayout from "../components/AuthLayout.jsx"
 import Input from "../components/Input.jsx"
 import Button from "../components/Button.jsx"
 import StepIndicator from "../components/StepIndicator.jsx"
+import { Eye, EyeOff } from 'lucide-react';
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams()
@@ -18,6 +19,8 @@ const ResetPassword = () => {
     const [error, setError] = useState("")
     const [fieldErrors, setFieldErrors] = useState({})
     const [loading, setLoading] = useState(false)
+    const [viewPassword1, setViewPassword1] = useState(false)
+    const [viewPassword2, setViewPassword2] = useState(false)
 
     const validate = () => {
         const errors = {}
@@ -33,6 +36,14 @@ const ResetPassword = () => {
         }
 
         return errors
+    }
+
+    const showPassword1 = () => {
+        setViewPassword1((prev) => (!prev))
+    }
+
+    const showPassword2 = () => {
+        setViewPassword2((prev) => (!prev))
     }
 
     const handleSubmit = async (event) => {
@@ -144,30 +155,44 @@ const ResetPassword = () => {
             <StepIndicator step={3} total={3} label="New password" />
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                <Input
-                    id="password"
-                    type="password"
-                    label="New password"
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    error={fieldErrors.password}
-                    required
-                />
-
-                <Input
-                    id="confirmPassword"
-                    type="password"
-                    label="Confirm new password"
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    error={fieldErrors.confirmPassword}
-                    required
-                />
-
+                <div className="relative">
+                    <Input
+                        id="password"
+                        type={viewPassword1 ? "text" : "password"}
+                        label="New password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        error={fieldErrors.password}
+                        required
+                    />
+                    <button type="button"
+                        className="absolute right-4 top-10 cursor-pointer"
+                        onClick={showPassword1}
+                        >
+                            {viewPassword1 ? <Eye size={20} strokeWidth={1}/> : <EyeOff size={20} strokeWidth={1}/>}
+                    </button>
+                </div>
+                <div className="relative">
+                    <Input
+                        id="confirmPassword"
+                        type={viewPassword2 ? "text" : "password"}
+                        label="Confirm new password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        error={fieldErrors.confirmPassword}
+                        required
+                    />
+                    <button type="button"
+                    className="absolute right-4 top-10 cursor-pointer"
+                    onClick={showPassword2}
+                    >
+                        {viewPassword2 ? <Eye size={20} strokeWidth={1}/> : <EyeOff size={20} strokeWidth={1}/>}
+                    </button>
+                </div>
                 {error && (
                     <div
                         role="alert"
